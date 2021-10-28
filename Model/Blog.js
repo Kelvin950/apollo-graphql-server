@@ -1,6 +1,35 @@
 const mongoose =  require("mongoose")
 const Schema =  mongoose.Schema ;
 
+const replySchema =  new Schema({
+
+    reply:String,
+    author:String
+
+} , {
+    timestamps:true
+})
+
+const commentSchema  = new Schema({
+
+    comment:{
+        type:String ,
+        required:true 
+    } ,
+    author:{
+        type:String,
+        required:true
+    },
+reply:[
+    replySchema
+]
+    
+} , 
+
+{
+    timestamps:true
+})
+
 const blogSchema =  new Schema({
 
 
@@ -21,7 +50,8 @@ const blogSchema =  new Schema({
         ref:"Author"
     }
     ,
-   banner:String
+   banner:String ,
+   comment:[commentSchema]
 
 } ,  {
     timestamps:true
