@@ -4,27 +4,33 @@ const path = require("path");
 const { connectDB } = require("./database/connectdb");
 require("dotenv").config();
 const { graphqlHTTP } = require("express-graphql");
-const schema = require("./graphQl/schema");
-const resolver = require("./graphQl/resolver");
+const {ApolloServer , gql}= require("apollo-server")
+const typeDefs= require("./graphQl/schema");
+const resolvers = require("./graphQl/resolver");
 
 console.log(process.env.MongoURL);
 app.use("/img", express.static(path.resolve(__dirname, "img")));
 
 connectDB();
 
-app.use(
-  "/graphQl",
-  graphqlHTTP({
-    schema: schema,
-    rootValue: resolver,
-    graphiql: true,
-  })
-);
+// app.use(
+//   "/graphQl",
+//   graphqlHTTP({
+//     schema: schema,
+//     rootValue: resolver,
+//     graphiql: true,
+//   })
+// );
 
-app.use((error, req, res, next) => {
-  console.log(error);
-  res.json({ error: error });
-});
-app.listen(3000, () => {
-  console.log("http://localhost:3000");
-});
+const Server =new ApolloServer({typeDefs , resolvers})
+
+// app.use((error, req, res, next) => {
+//   console.log(error);
+//   res.json({ error: error });
+// });
+// app.listen(3000, () => {
+//   console.log("http://localhost:3000");
+// });
+Server.listen().then(({url})=>{
+  console.log(`Server ready at ${url}`)
+})

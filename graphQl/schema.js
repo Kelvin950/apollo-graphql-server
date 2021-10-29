@@ -1,8 +1,9 @@
-const {buildSchema} =  require("graphql")
+
+const {gql} = require("apollo-server")
 
 
-
-module.exports =  buildSchema(`
+module.exports =  gql 
+`
 type reply{
     _id:ID!
     reply:String!
@@ -79,7 +80,7 @@ type AuthorsData{
 type BlogsData{
     blogs:[blog]!
 }
-type RootQuery{
+type Query{
 
     authors:AuthorsData!
     blogs:BlogsData!
@@ -89,7 +90,7 @@ type RootQuery{
     comment(blogid:ID! , commentid:ID!):comment!
     reply(blogid:ID! , commentid:ID! , replyid:ID!):reply!
 }
-type RootMutation{
+type Mutation{
     createAuthor(authorInput:authorData):Author!
     createBlog(blogInput:blogData):blog!
     createComment(commentInput:commentData):comment!
@@ -100,12 +101,11 @@ type RootMutation{
     decreaseLikes(blogid:ID!):Boolean
     updateBlog(id:ID! , blogInput:updateBlogData):blog!
 }
-schema{
-
-    query:RootQuery
-    mutation:RootMutation
-
-}
 
 
-`)
+  
+
+
+
+
+`
