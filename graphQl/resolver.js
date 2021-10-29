@@ -90,7 +90,7 @@ module.exports = {
     }).save();
 
     const author = await Author.findById(blogInput.authorID);
-    console.log(author);
+    // console.log(author);
     if (!author) {
       const error = new Error("No user with this id found");
       throw error;
@@ -236,7 +236,7 @@ module.exports = {
         error.statusCode = 404;
         throw error;
        }
-       console.log(blog)
+      //  console.log(blog)
        const author =  await Author.findById(blog.author);
        if(!author){
         const error = new Error("Author not found");
@@ -376,7 +376,7 @@ module.exports = {
         error.statusCode = 404;
         throw error;
       }
-      console.log(comment);
+      // console.log(comment);
       const reply = await comment.reply.find(
         (r) => r._id.toString() === replyid
       );
@@ -444,5 +444,58 @@ module.exports = {
       }
       throw err;
     }
+  }
+  ,
+  increaseLikes: async function({blogid} , req){
+     
+    try{
+      
+      const blog =  await Blog.findById(blogid);
+      if(!blog){
+      const error= new Error("Blog not found");
+      error.statusCode =  404;
+      throw error;
+      }
+
+       blog.likes++;
+      await blog.save();
+
+      return true;
+
+    }catch(err){
+
+      err.statusCode =  err.statusCode || 500
+      throw err;
+    }
+
+  } ,
+  decreaseLikes: async function({blogid} , req){
+    try{
+      
+      const blog =  await Blog.findById(blogid);
+      if(!blog){
+      const error= new Error("Blog not found");
+      error.statusCode =  404;
+      throw error;
+      }
+
+       if(blog.likes===0){
+           blog.likes =0
+       }else{
+
+        blog.likes--;
+       }
+
+      await blog.save()
+      
+       
+      return true;
+
+    }catch(err){
+
+      err.statusCode =  err.statusCode || 500
+      throw err;
+    }
+
   }
 };

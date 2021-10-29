@@ -41,6 +41,7 @@ title:String!
 content:String!
 banner:String!
 author:Author
+likes:Int!
 comment:[comment]!
 createdAt:String!
 updatedAt:String!
@@ -95,6 +96,8 @@ type RootMutation{
     createReply(replyInput:replyData):reply!
     deleteComment(blogid:ID! , commentid:ID!):Boolean
     deleteBlog(id:ID!):Boolean
+    increaseLikes(blogid:ID!):Boolean
+    decreaseLikes(blogid:ID!):Boolean
     updateBlog(id:ID! , blogInput:updateBlogData):blog!
 }
 schema{
