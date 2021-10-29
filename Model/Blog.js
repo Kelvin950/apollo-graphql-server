@@ -18,7 +18,8 @@ const commentSchema  = new Schema({
     } ,
     author:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
 reply:[
     replySchema
@@ -35,7 +36,8 @@ const blogSchema =  new Schema({
 
     title:{
         type:String ,
-        required:true
+        required:true,
+        unique:true
     } ,
     content:{
         type:String ,

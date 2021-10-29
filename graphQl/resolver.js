@@ -246,7 +246,9 @@ module.exports = {
         errors.push({message:"profession cannot be empty"})
       }
        if(errors.length >0){
-          throw new UserInputError("Invalid input values")
+          throw new UserInputError("Invalid input values", {
+            statusCode:422
+          })
        }
       const newAuthor = await new Author({
         name: authorInput.name,
@@ -284,7 +286,9 @@ module.exports = {
         }
        
         if(errors.length >0){
-          throw new UserInputError("Invalid input values");
+          throw new UserInputError("Invalid input values" , {
+            statusCode:422
+          });
         }
 
       const newblog = await new Blog({
@@ -519,6 +523,7 @@ module.exports = {
     },
     increaseLikes: async function (parent ,{ blogid },req) {
       try {
+        console.log(blogid);
         const blog = await Blog.findById(blogid);
         if (!blog) {
           const error = new Error("Blog not found");
