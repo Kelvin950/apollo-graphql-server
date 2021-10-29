@@ -53,6 +53,11 @@ input blogData{
     banner:String!
     authorID:String!
 }
+input updateBlogData{
+    title:String!
+    content:String!
+    banner:String!
+}
 type Author{
     _id:ID!
     name:String
@@ -88,6 +93,9 @@ type RootMutation{
     createBlog(blogInput:blogData):blog!
     createComment(commentInput:commentData):comment!
     createReply(replyInput:replyData):reply!
+    deleteComment(blogid:ID! , commentid:ID!):Boolean
+    deleteBlog(id:ID!):Boolean
+    updateBlog(id:ID! , blogInput:updateBlogData):blog!
 }
 schema{
 

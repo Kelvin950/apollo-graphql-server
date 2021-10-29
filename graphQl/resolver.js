@@ -196,6 +196,63 @@ module.exports = {
       throw err;
     }
   },
+  updateBlog:async function({id ,blogInput } , req){
+     try{
+      
+      const blog =  await Blog.findById(id).populate("author") ;
+      if(!blog){
+        const error = new Error("Blog not found");
+        error.statusCode = 404;
+        throw error;
+      }
+      blog.title = blogInput.title ;
+      blog.banner =  blogInput.banner;
+      blog.content =  blogInput.content;
+
+    const updatedBlog =  await blog.save();
+
+     return  {
+      ...updatedBlog._doc,
+      _id: updatedBlog._id.toString(),
+      title: updatedBlog.title,
+      content: updatedBlog.content,
+      banner: updatedBlog.banner,
+      author: { ...updatedBlog.author._doc, name: updatedBlog.author.name },
+      createdAt: updatedBlog.createdAt.toISOString(),
+      updatedAt: updatedBlog.updatedAt.toISOString(),
+     }
+        
+     }catch(err){
+       err.statusCode = err.statusCode ||500
+       throw err
+     }
+  } ,
+  deleteBlog:async function ({id} ,req){
+
+    try{
+       const blog =  await Blog.findById(id);
+       if(!blog){
+        const error = new Error("Blog not found");
+        error.statusCode = 404;
+        throw error;
+       }
+       console.log(blog)
+       const author =  await Author.findById(blog.author);
+       if(!author){
+        const error = new Error("Author not found");
+        error.statusCode = 404;
+        throw error;
+       }
+       author.blogs.pull(id)
+       await Blog.findByIdAndRemove(id);
+       return true
+
+    }
+    catch(err){
+      err.statusCode =  err.statusCode || 500;
+      throw err;
+    }
+  } ,
   createComment: async function ({ commentInput }, req) {
     try {
       const blog = await Blog.findById(commentInput._blogId);
@@ -271,6 +328,36 @@ module.exports = {
       err.statusCode = err.statusCode || 500;
       throw err;
     }
+  },
+  deleteComment : async function({blogid , commentid} , req){
+  
+   try{
+    const blog =  await Blog.findById(blogid);
+    if(!blog){
+      const error=  new Error("No blog found");
+      error.statusCode =  404 ;
+      throw error;
+    }
+
+     const comment =  blog.comment.find(c=> c._id.toString()=== commentid);
+ if(!comment){
+  const error=  new Error("No comment found");
+  error.statusCode =  404 ;
+  throw error;
+ }
+     blog.comment.pull(comment)
+       await blog.save()
+       return true;
+
+   }catch(err){
+
+    err.stausCode =  err.statusCode || 500;
+    throw err;
+   }
+    
+      
+
+
   },
   reply: async function ({ blogid, commentid, replyid }, req) {
     try {
