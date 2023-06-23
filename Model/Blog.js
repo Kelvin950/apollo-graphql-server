@@ -19,7 +19,7 @@ const commentSchema  = new Schema({
     author:{
         type:String,
         required:true,
-        unique:true
+       
     },
 reply:[
     replySchema

@@ -1,8 +1,8 @@
-const Author =require("../Model/Author");
+const Author = require("../Model/Author");
 const Blog = require("../Model/Blog");
 const mongoDb = require("mongodb");
-const validator =  require("validator")
-const {UserInputError} = require("apollo-server")
+const validator = require("validator");
+const { UserInputError } = require("apollo-server");
 module.exports = {
   Query: {
     authors: async () => {
@@ -30,7 +30,7 @@ module.exports = {
       };
     },
 
-    author: async function (parent ,{ id },req) {
+    author: async function (parent, { id }, req) {
       try {
         const author = await Author.findById(id).populate("blogs");
 
@@ -103,7 +103,7 @@ module.exports = {
         }),
       };
     },
-    blog: async function (parent ,{ id },req) {
+    blog: async function (parent, { id }, req) {
       try {
         const blog = await Blog.findById(id).populate("author");
 
@@ -148,7 +148,7 @@ module.exports = {
         throw err;
       }
     },
-    comment: async function (parent ,{ blogid, commentid },req) {
+    comment: async function (parent, { blogid, commentid }, req) {
       try {
         const blog = await Blog.findById(blogid);
         if (!blog) {
@@ -190,7 +190,7 @@ module.exports = {
         throw err;
       }
     },
-    reply: async function (parent ,{ blogid, commentid, replyid },req) {
+    reply: async function (parent, { blogid, commentid, replyid }, req) {
       try {
         const blog = await Blog.findById(blogid);
         if (!blog) {
@@ -234,113 +234,123 @@ module.exports = {
   },
 
   Mutation: {
-    createAuthor: async function ( parent , {authorInput}) {
-        try{
-      
-
-      const errors =  []
-      if(validator.isEmpty(authorInput.name)){
-          errors.push({message:"name cannot be empty"});
-      }
-      if(validator.isEmpty(authorInput.profession)){
-        errors.push({message:"profession cannot be empty"})
-      }
-       if(errors.length >0){
+    createAuthor: async function (parent, { authorInput }) {
+      try {
+        const errors = [];
+        if (validator.isEmpty(authorInput.name)) {
+          errors.push({ message: "name cannot be empty" });
+        }
+        if (validator.isEmpty(authorInput.profession)) {
+          errors.push({ message: "profession cannot be empty" });
+        }
+        if (errors.length > 0) {
           throw new UserInputError("Invalid input values", {
-            statusCode:422
-          })
-       }
-      const newAuthor = await new Author({
-        name: authorInput.name,
-        profession: authorInput.profession,
-        age: authorInput.age,
-        gender: authorInput.gender,
-      }).save();
+            statusCode: 422,
+          });
+        }
+        const newAuthor = await new Author({
+          name: authorInput.name,
+          profession: authorInput.profession,
+          age: authorInput.age,
+          gender: authorInput.gender,
+        }).save();
 
-      return {
-        ...newAuthor._doc,
-        _id: newAuthor._id.toString(),
-        name: newAuthor.name,
-        profession: newAuthor.profession,
-        age: newAuthor.age,
-        gender: newAuthor.gender,
-      };}catch(err){
-        
-        err.statusCode= err.statusCode || 500
-        throw err
+        return {
+          ...newAuthor._doc,
+          _id: newAuthor._id.toString(),
+          name: newAuthor.name,
+          profession: newAuthor.profession,
+          age: newAuthor.age,
+          gender: newAuthor.gender,
+        };
+      } catch (err) {
+        err.statusCode = err.statusCode || 500;
+        throw err;
       }
     },
 
-    createBlog: async function ( parent,{ blogInput }) {
-        
-      try{
-        const errors =[];
-        if(validator.isEmpty(blogInput.title) || !validator.isLength(blogInput.title , {min:10 , max:200})){
-          errors.push({message:"Invalid input"})
+    createBlog: async function (parent, { blogInput }) {
+      try {
+        const errors = [];
+        if (
+          validator.isEmpty(blogInput.title) ||
+          !validator.isLength(blogInput.title, { min: 10, max: 200 })
+        ) {
+          errors.push({ message: "Invalid input" });
         }
-        if(validator.isEmpty(blogInput.content) || !validator.isLength(blogInput.content , {min:100})){
-          errors.push({message:"Invalid input"})
+        if (
+          validator.isEmpty(blogInput.content) ||
+          !validator.isLength(blogInput.content, { min: 100 })
+        ) {
+          errors.push({ message: "Invalid input" });
         }
-        if(validator.isEmpty(blogInput.banner)){
-          errors.push({message:"Invalid input"})
+        if (validator.isEmpty(blogInput.banner)) {
+          errors.push({ message: "Invalid input" });
         }
-       
-        if(errors.length >0){
-          throw new UserInputError("Invalid input values" , {
-            statusCode:422
+
+        if (errors.length > 0) {
+          throw new UserInputError("Invalid input values", {
+            statusCode: 422,
           });
         }
 
-      const newblog = await new Blog({
-        title: blogInput.title,
-        content: blogInput.content,
-        banner: blogInput.banner,
-        author: mongoDb.ObjectId(blogInput.authorID),
-      }).save();
+        const newblog = await new Blog({
+          title: blogInput.title,
+          content: blogInput.content,
+          banner: blogInput.banner,
+          author: mongoDb.ObjectId(blogInput.authorID),
+        }).save();
 
-      const author = await Author.findById(blogInput.authorID);
-      // console.log(author);
-      if (!author) {
-        const error = new Error("No user with this id found");
-        throw error;
-      }
-      author.blogs.push(newblog._id);
-      await author.save();
+        
+        const author = await Author.findById(blogInput.authorID);
+        // console.log(author);
+        if (!author) {
+          const error = new Error("No user with this id found");
+          throw error;
+        }
+        author.blogs.push(newblog._id);
+        await author.save();
 
-      return {
-        ...newblog._doc,
-        _id: newblog._id.toString(),
-        title: newblog.title,
-        content: newblog.content,
-        banner: newblog.banner,
-        author: { ...author._doc, name: author.name },
-        createdAt: newblog.createdAt.toISOString(),
-        updatedAt: newblog.updatedAt.toISOString(),
-      };}catch(err){
-
-        err.statusCode = err.statusCode || 500
-        throw err
+        return {
+          ...newblog._doc,
+          _id: newblog._id.toString(),
+          title: newblog.title,
+          content: newblog.content,
+          banner: newblog.banner,
+          author: { ...author._doc, name: author.name },
+          createdAt: newblog.createdAt.toISOString(),
+          updatedAt: newblog.updatedAt.toISOString(),
+        };
+      } catch (err) {
+        console.log(err)
+        err.statusCode = err.statusCode || 500;
+        throw err;
       }
     },
 
-    updateBlog: async function ( parent,{ id, blogInput }) {
+    updateBlog: async function (parent, { id, blogInput }) {
       try {
+        const errors = [];
+        if (
+          validator.isEmpty(blogInput.title) ||
+          !validator.isLength(blogInput.title, { min: 10, max: 200 })
+        ) {
+          errors.push({ message: "Invalid input" });
+        }
+        if (
+          validator.isEmpty(blogInput.content) ||
+          !validator.isLength(blogInput.content, { min: 100 })
+        ) {
+          errors.push({ message: "Invalid input" });
+        }
+        if (validator.isEmpty(blogInput.banner)) {
+          errors.push({ message: "Invalid input" });
+        }
 
-        const errors =[];
-        if(validator.isEmpty(blogInput.title) || !validator.isLength(blogInput.title , {min:10 , max:200})){
-          errors.push({message:"Invalid input"})
-        }
-        if(validator.isEmpty(blogInput.content) || !validator.isLength(blogInput.content , {min:100})){
-          errors.push({message:"Invalid input"})
-        }
-        if(validator.isEmpty(blogInput.banner)){
-          errors.push({message:"Invalid input"})
-        }
-       
-        if(errors.length >0){
+        if (errors.length > 0) {
           throw new UserInputError("Invalid input values");
         }
-          
+
         const blog = await Blog.findById(id).populate("author");
         if (!blog) {
           const error = new Error("Blog not found");
@@ -368,7 +378,7 @@ module.exports = {
         throw err;
       }
     },
-    deleteBlog: async function ( parent,{ id },req) {
+    deleteBlog: async function (parent, { id }, req) {
       try {
         const blog = await Blog.findById(id);
         if (!blog) {
@@ -391,18 +401,20 @@ module.exports = {
         throw err;
       }
     },
-    createComment: async function (parent ,{ commentInput },req) {
+    createComment: async function (parent, { commentInput }, req) {
       try {
+        const errors = [];
+        if (
+          validator.isEmpty(commentInput.comment) ||
+          !validator.isLength(commentInput.comment, { min: 10, max: 200 })
+        ) {
+          errors.push({ message: "Invalid input" });
+        }
+        if (validator.isEmpty(commentInput.author)) {
+          errors.push({ message: "Invalid input" });
+        }
 
-        const errors =[];
-        if(validator.isEmpty(commentInput.comment) || !validator.isLength(commentInput.comment , {min:10 , max:200})){
-          errors.push({message:"Invalid input"})
-        }
-        if(validator.isEmpty(commentInput.author)){
-          errors.push({message:"Invalid input"})
-        }
-       
-        if(errors.length >0){
+        if (errors.length > 0) {
           throw new UserInputError("Invalid input values");
         }
         const blog = await Blog.findById(commentInput._blogId);
@@ -438,7 +450,7 @@ module.exports = {
       }
     },
 
-    deleteComment: async function (parent ,{ blogid, commentid },req) {
+    deleteComment: async function (parent, { blogid, commentid }, req) {
       try {
         const blog = await Blog.findById(blogid);
         if (!blog) {
@@ -464,18 +476,20 @@ module.exports = {
       }
     },
 
-    createReply: async function (parent ,{ replyInput },req) {
+    createReply: async function (parent, { replyInput }, req) {
       try {
-        
-        const errors =[];
-        if(validator.isEmpty(replyInput.reply) || !validator.isLength(replyInput.reply , {min:10 , max:200})){
-          errors.push({message:"Invalid input"})
+        const errors = [];
+        if (
+          validator.isEmpty(replyInput.reply) ||
+          !validator.isLength(replyInput.reply, { min: 10, max: 200 })
+        ) {
+          errors.push({ message: "Invalid input" });
         }
-        if(validator.isEmpty(replyInput.author)){
-          errors.push({message:"Invalid input"})
+        if (validator.isEmpty(replyInput.author)) {
+          errors.push({ message: "Invalid input" });
         }
-       
-        if(errors.length >0){
+
+        if (errors.length > 0) {
           throw new UserInputError("Invalid input values");
         }
         const blog = await Blog.findById(replyInput._blogId);
@@ -521,7 +535,7 @@ module.exports = {
         throw err;
       }
     },
-    increaseLikes: async function (parent ,{ blogid },req) {
+    increaseLikes: async function (parent, { blogid }, req) {
       try {
         console.log(blogid);
         const blog = await Blog.findById(blogid);
@@ -540,7 +554,7 @@ module.exports = {
         throw err;
       }
     },
-    decreaseLikes: async function (parent ,{ blogid },req) {
+    decreaseLikes: async function (parent, { blogid }, req) {
       try {
         const blog = await Blog.findById(blogid);
         if (!blog) {
