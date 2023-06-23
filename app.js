@@ -32,6 +32,6 @@ const Server =new ApolloServer({typeDefs , resolvers , introspection:true})
 //   console.log("http://localhost:3000");
 const port =  process.env.PORT || 4000
 
-Server.listen({port ,host}).then(({url})=>{
+Server.listen({port}).then(({url})=>{
   console.log(`Server ready at ${url}`)
 })
